@@ -3,37 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Firebase P2P Chat with Users</title>
+<title>Firebase Multi-Peer Chat</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-  body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
-  .app-container{display:flex;flex-direction:column;width:100%;max-width:480px;height:100vh;overflow:hidden;background:#fff;}
-  .connection-panel{padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;flex-direction:column;gap:12px;}
-  .connection-status{display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.95rem;}
-  .status-dot{width:12px;height:12px;border-radius:50%;background:#ff6b6b;transition:0.3s;}
-  .status-dot.connected{background:#51cf66;box-shadow:0 0 8px rgba(81,207,102,0.5);}
-  .connection-controls{display:flex;gap:8px;flex-wrap:wrap;}
-  .username-input,.message-input,.connection-input{padding:10px 12px;border-radius:18px;border:none;outline:none;font-size:0.9rem;flex:1;}
-  .btn{padding:10px 15px;border-radius:18px;border:none;cursor:pointer;font-weight:500;transition:0.3s;font-size:0.9rem;}
-  .btn.primary{background:#fff;color:#667eea;}
-  .btn:hover{opacity:0.85;transform:translateY(-1px);}
-  .chat-container{flex:1;display:flex;flex-direction:column;background:#f9fafb;overflow:hidden;position:relative;}
-  .users-container{padding:6px 12px;background:#eee;font-size:0.8rem;color:#333;}
-  .messages-container{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
-  .message{max-width:80%;padding:10px 14px;border-radius:16px;word-wrap:break-word;position:relative;animation:fadeIn 0.3s ease-in;font-size:0.9rem;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-  .message.own{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-bottom-right-radius:4px;}
-  .message.other{align-self:flex-start;background:#e4e6eb;color:#333;border-bottom-left-radius:4px;}
-  .message-info{font-size:0.65rem;opacity:0.6;margin-top:3px;}
-  .system-message{text-align:center;font-size:0.75rem;color:#666;margin:4px 0;font-style:italic;}
-  .input-container{display:flex;gap:6px;padding:10px 8px;background:#fff;border-top:1px solid #ddd;align-items:center;position:sticky;bottom:0;}
-  .send-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:50px;padding:10px 16px;cursor:pointer;font-weight:600;transition:0.3s;flex-shrink:0;}
-  .send-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .messages-container::-webkit-scrollbar{width:5px;}
-  .messages-container::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
-  .notification{position:fixed;top:12px;right:12px;background:#51cf66;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);transform:translateX(300px);transition:0.3s;z-index:1000;}
-  .notification.show{transform:translateX(0);}
-  @media(max-width:480px){.message{max-width:90%;}.send-btn{padding:10px;}}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
+.app-container{display:flex;flex-direction:column;width:100%;max-width:480px;height:100vh;overflow:hidden;background:#fff;}
+.connection-panel{padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;flex-direction:column;gap:12px;}
+.connection-status{display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.95rem;}
+.status-dot{width:12px;height:12px;border-radius:50%;background:#ff6b6b;transition:0.3s;}
+.status-dot.connected{background:#51cf66;box-shadow:0 0 8px rgba(81,207,102,0.5);}
+.connection-controls{display:flex;gap:8px;flex-wrap:wrap;}
+.username-input,.message-input,.connection-input{padding:10px 12px;border-radius:18px;border:none;outline:none;font-size:0.9rem;flex:1;}
+.btn{padding:10px 15px;border-radius:18px;border:none;cursor:pointer;font-weight:500;transition:0.3s;font-size:0.9rem;}
+.btn.primary{background:#fff;color:#667eea;}
+.btn:hover{opacity:0.85;transform:translateY(-1px);}
+.chat-container{flex:1;display:flex;flex-direction:column;background:#f9fafb;overflow:hidden;position:relative;}
+.users-container{padding:6px 12px;background:#eee;font-size:0.8rem;color:#333;}
+.messages-container{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.message{max-width:80%;padding:10px 14px;border-radius:16px;word-wrap:break-word;position:relative;animation:fadeIn 0.3s ease-in;font-size:0.9rem;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.message.own{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-bottom-right-radius:4px;}
+.message.other{align-self:flex-start;background:#e4e6eb;color:#333;border-bottom-left-radius:4px;}
+.message-info{font-size:0.65rem;opacity:0.6;margin-top:3px;}
+.system-message{text-align:center;font-size:0.75rem;color:#666;margin:4px 0;font-style:italic;}
+.input-container{display:flex;gap:6px;padding:10px 8px;background:#fff;border-top:1px solid #ddd;align-items:center;position:sticky;bottom:0;}
+.send-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:50px;padding:10px 16px;cursor:pointer;font-weight:600;transition:0.3s;flex-shrink:0;}
+.send-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.messages-container::-webkit-scrollbar{width:5px;}
+.messages-container::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
+.notification{position:fixed;top:12px;right:12px;background:#51cf66;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);transform:translateX(300px);transition:0.3s;z-index:1000;}
+.notification.show{transform:translateX(0);}
+@media(max-width:480px){.message{max-width:90%;}.send-btn{padding:10px;}}
 </style>
 </head>
 <body>
@@ -51,7 +51,7 @@
   </div>
   <div class="chat-container">
     <div class="messages-container" id="messagesContainer">
-      <div class="system-message">🚀 Firebase P2P Chat</div>
+      <div class="system-message">🚀 Multi-Peer Firebase Chat</div>
     </div>
     <div class="input-container">
       <input type="text" id="usernameInput" class="username-input" placeholder="Your name" value="Anonymous">
@@ -64,7 +64,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, set, remove, onValue, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import SimplePeer from "https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js";
 import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
 import { marked } from "https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js";
@@ -81,14 +81,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-class FirebaseP2PChat {
+class MultiPeerChat {
   constructor() {
-    this.peer = null; 
-    this.connected = false; 
+    this.peers = {}; // multiple peers
     this.username = 'Anonymous';
-    this.room = ''; 
+    this.room = '';
     this.peerId = Math.random().toString(36).substring(2,10);
-    this.initElements(); 
+    this.initElements();
     this.attachEvents();
   }
 
@@ -109,81 +108,87 @@ class FirebaseP2PChat {
     this.connectBtn.addEventListener('click',()=>this.connectRoom());
     this.sendBtn.addEventListener('click',()=>this.sendMessage());
     this.usernameInput.addEventListener('input', e=>this.username = e.target.value.trim() || 'Anonymous');
-    this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter' && this.connected) this.sendMessage();});
+    this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter') this.sendMessage();});
   }
 
   connectRoom(){
     this.room = this.roomInput.value.trim();
     if(!this.room) return alert("Enter room name");
 
-    this.initPeer(true);
-
+    // add self to users list
     const usersRef = ref(db, `rooms/${this.room}/users/${this.peerId}`);
     set(usersRef, this.username);
-    // Remove user on disconnect
     window.addEventListener('beforeunload', ()=>remove(usersRef));
 
-    // Listen for active users
+    // show active users
     const roomUsersRef = ref(db, `rooms/${this.room}/users`);
-    onValue(roomUsersRef, snapshot => {
-      const users = snapshot.val() || {};
+    onValue(roomUsersRef, snapshot=>{
+      const users = snapshot.val()||{};
       const names = Object.values(users);
-      this.usersContainer.textContent = names.length ? "Users: " + names.join(', ') : "Users: None";
+      this.usersContainer.textContent = names.length ? "Users: "+names.join(', ') : "Users: None";
+      if(names.length>1) this.updateStatus('Connected to peers!', true);
+      else this.updateStatus('Waiting for peers...', false);
     });
 
+    // listen for signals from other peers
     this.listenFirebase();
-    this.updateStatus('Connecting...', false);
+    this.messageInput.disabled = false;
+    this.sendBtn.disabled = false;
   }
 
-  initPeer(initiator){
-    this.peer = new SimplePeer({ initiator, trickle: false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
-    
-    this.peer.on('signal', data=>{
-      push(ref(db, `rooms/${this.room}/signals`), { signal:data, from:this.peerId });
+  initPeer(targetId, initiator=true){
+    if(this.peers[targetId]) return this.peers[targetId]; // already exists
+    const peer = new SimplePeer({ initiator, trickle:false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
+
+    peer.on('signal', signal=>{
+      push(ref(db, `rooms/${this.room}/signals`), { from:this.peerId, to:targetId, signal });
     });
 
-    this.peer.on('connect', ()=>this.onConnect());
-    this.peer.on('data', data=>this.onData(data));
-    this.peer.on('close', ()=>this.onDisconnect());
+    peer.on('connect', ()=>this.addSystemMessage(`Peer ${targetId} connected!`));
+    peer.on('data', data=>this.onData(data));
+    peer.on('close', ()=>this.addSystemMessage(`Peer ${targetId} disconnected`));
+
+    this.peers[targetId] = peer;
+    return peer;
   }
 
   listenFirebase(){
     const signalsRef = ref(db, `rooms/${this.room}/signals`);
-    onChildAdded(signalsRef, snapshot => {
-      const obj = snapshot.val();
-      if(obj.from === this.peerId) return;
-      remove(snapshot.ref); // remove used signal
-      if(!this.peer) this.initPeer(false);
-      this.peer.signal(obj.signal);
+    onChildAdded(signalsRef, snapshot=>{
+      const { from, to, signal } = snapshot.val();
+      if(from === this.peerId) return; // ignore self
+      if(to !== this.peerId && to !== 'all') return; // not for me
+
+      // init peer if not exists
+      const peer = this.initPeer(from, false);
+      peer.signal(signal);
+      remove(snapshot.ref);
+    });
+
+    // handle new users and initiate connections
+    const usersRef = ref(db, `rooms/${this.room}/users`);
+    onValue(usersRef, snapshot=>{
+      const users = snapshot.val()||{};
+      Object.keys(users).forEach(uid=>{
+        if(uid!==this.peerId && !this.peers[uid]){
+          this.initPeer(uid, true);
+        }
+      });
     });
   }
 
-  onConnect(){
-    this.connected = true;
-    this.updateStatus('Connected! You can chat', true);
-    this.messageInput.disabled = false;
-    this.sendBtn.disabled = false;
-    this.messageInput.placeholder = 'Type a message...';
-    this.addSystemMessage('🎉 Connected to peer!');
-  }
-
-  onDisconnect(){
-    this.connected = false;
-    this.updateStatus('Disconnected', false);
-    this.showNotification('Peer disconnected','error');
+  sendMessage(){
+    const text = this.messageInput.value.trim();
+    if(!text) return;
+    const msg = { type:'message', text:this.encrypt(text), username:this.username };
+    Object.values(this.peers).forEach(p=>p.connected && p.send(JSON.stringify(msg)));
+    this.addMessage(text, this.username, true);
+    this.messageInput.value='';
   }
 
   onData(data){
     const msg = JSON.parse(data.toString());
-    if(msg.type === 'message') this.addMessage(this.decrypt(msg.text), msg.username, false);
-  }
-
-  sendMessage(){
-    const text = this.messageInput.value.trim(); if(!text) return;
-    const msg = { type:'message', text:this.encrypt(text), username:this.username };
-    this.peer.send(JSON.stringify(msg));
-    this.addMessage(text, this.username, true);
-    this.messageInput.value = '';
+    if(msg.type==='message') this.addMessage(this.decrypt(msg.text), msg.username, false);
   }
 
   encrypt(msg){ return CryptoJS.AES.encrypt(msg,'secret-key').toString(); }
@@ -191,7 +196,7 @@ class FirebaseP2PChat {
 
   addMessage(text, username, isOwn){
     const div = document.createElement('div');
-    div.className = 'message ' + (isOwn ? 'own':'other');
+    div.className = 'message '+(isOwn?'own':'other');
     div.innerHTML = `<div class="message-bubble">${marked.parseInline(text)}</div>
                      <div class="message-info">${username} • ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
     this.messagesContainer.appendChild(div);
@@ -210,16 +215,9 @@ class FirebaseP2PChat {
     this.statusText.textContent = text;
     connected ? this.statusDot.classList.add('connected') : this.statusDot.classList.remove('connected');
   }
-
-  showNotification(msg, type='success'){
-    this.notification.textContent = msg; 
-    this.notification.style.background = type==='error' ? '#ff6b6b':'#51cf66';
-    this.notification.classList.add('show'); 
-    setTimeout(()=>this.notification.classList.remove('show'), 3000);
-  }
 }
 
-new FirebaseP2PChat();
+new MultiPeerChat();
 </script>
 </body>
 </html>
