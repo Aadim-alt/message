@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Firebase P2P Chat</title>
+<title>Firebase P2P Chat with Users</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
   body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
@@ -18,6 +18,7 @@
   .btn.primary{background:#fff;color:#667eea;}
   .btn:hover{opacity:0.85;transform:translateY(-1px);}
   .chat-container{flex:1;display:flex;flex-direction:column;background:#f9fafb;overflow:hidden;position:relative;}
+  .users-container{padding:6px 12px;background:#eee;font-size:0.8rem;color:#333;}
   .messages-container{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
   .message{max-width:80%;padding:10px 14px;border-radius:16px;word-wrap:break-word;position:relative;animation:fadeIn 0.3s ease-in;font-size:0.9rem;}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
@@ -32,6 +33,7 @@
   .messages-container::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
   .notification{position:fixed;top:12px;right:12px;background:#51cf66;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);transform:translateX(300px);transition:0.3s;z-index:1000;}
   .notification.show{transform:translateX(0);}
+  @media(max-width:480px){.message{max-width:90%;}.send-btn{padding:10px;}}
 </style>
 </head>
 <body>
@@ -45,6 +47,7 @@
       <input type="text" id="roomInput" class="connection-input" placeholder="Room name">
       <button class="btn primary" id="connectBtn">Connect</button>
     </div>
+    <div class="users-container" id="usersContainer">Users: None</div>
   </div>
   <div class="chat-container">
     <div class="messages-container" id="messagesContainer">
@@ -61,12 +64,12 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, onValue, remove, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import SimplePeer from "https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js";
 import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
 import { marked } from "https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js";
 
-// ✅ Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyB6UHNUKO2Qj3IUgsISxz99BoOQYuGS_vc",
   authDomain: "link-88288.firebaseapp.com",
@@ -80,16 +83,16 @@ const db = getDatabase(app);
 
 class FirebaseP2PChat {
   constructor() {
-    this.peer = null;
-    this.connected = false;
+    this.peer = null; 
+    this.connected = false; 
     this.username = 'Anonymous';
-    this.room = '';
+    this.room = ''; 
     this.peerId = Math.random().toString(36).substring(2,10);
-    this.initElements();
+    this.initElements(); 
     this.attachEvents();
   }
 
-  initElements() {
+  initElements(){
     this.roomInput = document.getElementById('roomInput');
     this.connectBtn = document.getElementById('connectBtn');
     this.messagesContainer = document.getElementById('messagesContainer');
@@ -99,40 +102,44 @@ class FirebaseP2PChat {
     this.statusDot = document.getElementById('statusDot');
     this.statusText = document.getElementById('statusText');
     this.notification = document.getElementById('notification');
+    this.usersContainer = document.getElementById('usersContainer');
   }
 
-  attachEvents() {
-    this.connectBtn.addEventListener('click', ()=>this.connectRoom());
-    this.sendBtn.addEventListener('click', ()=>this.sendMessage());
-    this.usernameInput.addEventListener('input', e=>this.username=e.target.value.trim()||'Anonymous');
-    this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter' && this.connected)this.sendMessage();});
+  attachEvents(){
+    this.connectBtn.addEventListener('click',()=>this.connectRoom());
+    this.sendBtn.addEventListener('click',()=>this.sendMessage());
+    this.usernameInput.addEventListener('input', e=>this.username = e.target.value.trim() || 'Anonymous');
+    this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter' && this.connected) this.sendMessage();});
   }
 
-  async connectRoom() {
+  connectRoom(){
     this.room = this.roomInput.value.trim();
-    if(!this.room) return alert("Enter a room name");
+    if(!this.room) return alert("Enter room name");
 
-    const roomRef = ref(db, `rooms/${this.room}`);
+    this.initPeer(true);
 
-    // Check if someone already in room
-    let initiator = true;
-    onChildAdded(roomRef, snapshot=>{
-      const obj = snapshot.val();
-      if(obj.from === this.peerId) return;
-      initiator = false; // if a peer exists, we are not initiator
-      if(!this.peer) this.initPeer(false);
-      this.peer.signal(obj.signal);
+    const usersRef = ref(db, `rooms/${this.room}/users/${this.peerId}`);
+    set(usersRef, this.username);
+    // Remove user on disconnect
+    window.addEventListener('beforeunload', ()=>remove(usersRef));
+
+    // Listen for active users
+    const roomUsersRef = ref(db, `rooms/${this.room}/users`);
+    onValue(roomUsersRef, snapshot => {
+      const users = snapshot.val() || {};
+      const names = Object.values(users);
+      this.usersContainer.textContent = names.length ? "Users: " + names.join(', ') : "Users: None";
     });
 
-    if(initiator) this.initPeer(true);
+    this.listenFirebase();
     this.updateStatus('Connecting...', false);
   }
 
-  initPeer(isInitiator) {
-    this.peer = new SimplePeer({ initiator: isInitiator, trickle: false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
-
+  initPeer(initiator){
+    this.peer = new SimplePeer({ initiator, trickle: false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
+    
     this.peer.on('signal', data=>{
-      push(ref(db, `rooms/${this.room}`), { signal: data, from: this.peerId });
+      push(ref(db, `rooms/${this.room}/signals`), { signal:data, from:this.peerId });
     });
 
     this.peer.on('connect', ()=>this.onConnect());
@@ -140,7 +147,18 @@ class FirebaseP2PChat {
     this.peer.on('close', ()=>this.onDisconnect());
   }
 
-  onConnect() {
+  listenFirebase(){
+    const signalsRef = ref(db, `rooms/${this.room}/signals`);
+    onChildAdded(signalsRef, snapshot => {
+      const obj = snapshot.val();
+      if(obj.from === this.peerId) return;
+      remove(snapshot.ref); // remove used signal
+      if(!this.peer) this.initPeer(false);
+      this.peer.signal(obj.signal);
+    });
+  }
+
+  onConnect(){
     this.connected = true;
     this.updateStatus('Connected! You can chat', true);
     this.messageInput.disabled = false;
@@ -149,21 +167,20 @@ class FirebaseP2PChat {
     this.addSystemMessage('🎉 Connected to peer!');
   }
 
-  onDisconnect() {
+  onDisconnect(){
     this.connected = false;
     this.updateStatus('Disconnected', false);
     this.showNotification('Peer disconnected','error');
   }
 
-  onData(data) {
+  onData(data){
     const msg = JSON.parse(data.toString());
     if(msg.type === 'message') this.addMessage(this.decrypt(msg.text), msg.username, false);
   }
 
-  sendMessage() {
-    const text = this.messageInput.value.trim();
-    if(!text) return;
-    const msg = { type: 'message', text: this.encrypt(text), username: this.username };
+  sendMessage(){
+    const text = this.messageInput.value.trim(); if(!text) return;
+    const msg = { type:'message', text:this.encrypt(text), username:this.username };
     this.peer.send(JSON.stringify(msg));
     this.addMessage(text, this.username, true);
     this.messageInput.value = '';
@@ -174,7 +191,7 @@ class FirebaseP2PChat {
 
   addMessage(text, username, isOwn){
     const div = document.createElement('div');
-    div.className = 'message ' + (isOwn?'own':'other');
+    div.className = 'message ' + (isOwn ? 'own':'other');
     div.innerHTML = `<div class="message-bubble">${marked.parseInline(text)}</div>
                      <div class="message-info">${username} • ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
     this.messagesContainer.appendChild(div);
@@ -195,10 +212,10 @@ class FirebaseP2PChat {
   }
 
   showNotification(msg, type='success'){
-    this.notification.textContent = msg;
-    this.notification.style.background = type==='error'?'#ff6b6b':'#51cf66';
-    this.notification.classList.add('show');
-    setTimeout(()=>this.notification.classList.remove('show'),3000);
+    this.notification.textContent = msg; 
+    this.notification.style.background = type==='error' ? '#ff6b6b':'#51cf66';
+    this.notification.classList.add('show'); 
+    setTimeout(()=>this.notification.classList.remove('show'), 3000);
   }
 }
 
