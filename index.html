@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>P2P Chat - Internet Friendly</title>
+<title>Firebase P2P Chat</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
   body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
@@ -43,12 +43,13 @@
       <span id="statusText">Disconnected - Ready</span>
     </div>
     <div class="connection-controls">
-      <button class="btn primary" id="connectBtn">Connect to Peer</button>
+      <input type="text" id="roomInput" class="connection-input" placeholder="Room name">
+      <button class="btn primary" id="connectBtn">Connect</button>
     </div>
   </div>
   <div class="chat-container">
     <div class="messages-container" id="messagesContainer">
-      <div class="system-message">🚀 Internet Friendly P2P Chat</div>
+      <div class="system-message">🚀 Firebase P2P Chat</div>
     </div>
     <div class="input-container">
       <input type="text" id="usernameInput" class="username-input" placeholder="Your name" value="Anonymous">
@@ -59,63 +60,75 @@
 </div>
 <div class="notification" id="notification"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js"></script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import SimplePeer from "https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js";
+import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
+import { marked } from "https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js";
 
-<script>
-class InternetP2PChat {
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyB6UHNUKO2Qj3IUgsISxz99BoOQYuGS_vc",
+  authDomain: "link-88288.firebaseapp.com",
+  projectId: "link-88288",
+  storageBucket: "link-88288.appspot.com",
+  messagingSenderId: "166586794486",
+  appId: "1:166586794486:web:abd1f2dfbbbbfe56ef47d7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+class FirebaseP2PChat {
   constructor() {
     this.peer=null; this.connected=false; this.username='Anonymous';
-    this.ws=null; this.peerId=Math.random().toString(36).substring(2,10);
+    this.room=''; this.peerId=Math.random().toString(36).substring(2,10);
     this.initElements(); this.attachEvents();
   }
 
   initElements(){
-    this.statusDot=document.getElementById('statusDot'); this.statusText=document.getElementById('statusText');
+    this.roomInput=document.getElementById('roomInput');
     this.connectBtn=document.getElementById('connectBtn');
     this.messagesContainer=document.getElementById('messagesContainer');
     this.usernameInput=document.getElementById('usernameInput');
-    this.messageInput=document.getElementById('messageInput'); this.sendBtn=document.getElementById('sendBtn');
+    this.messageInput=document.getElementById('messageInput');
+    this.sendBtn=document.getElementById('sendBtn');
+    this.statusDot=document.getElementById('statusDot');
+    this.statusText=document.getElementById('statusText');
     this.notification=document.getElementById('notification');
   }
 
   attachEvents(){
-    this.connectBtn.addEventListener('click',()=>this.connectSignaling());
+    this.connectBtn.addEventListener('click',()=>this.connectRoom());
     this.sendBtn.addEventListener('click',()=>this.sendMessage());
     this.usernameInput.addEventListener('input', e=>this.username=e.target.value.trim()||'Anonymous');
     this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter'&&this.connected)this.sendMessage();});
   }
 
-  connectSignaling(){
-    if(this.ws) return;
-    this.ws = new WebSocket('wss://signalserver.openwebrtc.org');
-    this.ws.onopen = ()=>this.showNotification('Connected to signaling server','success');
-    this.ws.onmessage = msg=>{
-      const data = JSON.parse(msg.data);
-      if(data.to!==this.peerId) return;
-      if(data.type==='signal') this.peer.signal(data.signal);
-    };
+  connectRoom(){
+    this.room=this.roomInput.value.trim();
+    if(!this.room) return alert("Enter room name");
     this.initPeer(true);
+    this.listenFirebase();
+    this.updateStatus('Connecting...',false);
   }
 
   initPeer(initiator){
-    this.peer = new SimplePeer({
-      initiator,
-      trickle:false,
-      config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
+    this.peer = new SimplePeer({ initiator, trickle: false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
+    this.peer.on('signal', data=>{
+      push(ref(db, `rooms/${this.room}`), { signal:data, from:this.peerId });
     });
-
-    this.peer.on('signal', signal=>{
-      this.ws.send(JSON.stringify({type:'signal',signal,from:this.peerId,to:'all'}));
-    });
-
     this.peer.on('connect', ()=>this.onConnect());
-    this.peer.on('data', data=>this.handleData(data));
-    this.peer.on('error', err=>this.showNotification('Peer error:'+err.message,'error'));
-    this.peer.on('close', ()=>{
-      this.connected=false; this.updateStatus('Disconnected',false);
-      this.showNotification('Peer disconnected','error');
+    this.peer.on('data', data=>this.onData(data));
+    this.peer.on('close', ()=>this.onDisconnect());
+  }
+
+  listenFirebase(){
+    const roomRef = ref(db, `rooms/${this.room}`);
+    onChildAdded(roomRef, snapshot=>{
+      const obj = snapshot.val();
+      if(obj.from!==this.peerId) this.peer.signal(obj.signal);
     });
   }
 
@@ -126,8 +139,14 @@ class InternetP2PChat {
     this.addSystemMessage('🎉 Connected to peer!');
   }
 
-  handleData(data){
-    let msg=JSON.parse(data.toString());
+  onDisconnect(){
+    this.connected=false;
+    this.updateStatus('Disconnected',false);
+    this.showNotification('Peer disconnected','error');
+  }
+
+  onData(data){
+    const msg=JSON.parse(data.toString());
     if(msg.type==='message') this.addMessage(this.decrypt(msg.text), msg.username,false);
   }
 
@@ -150,8 +169,17 @@ class InternetP2PChat {
     this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight;
   }
 
+  addSystemMessage(text){
+    const div=document.createElement('div');
+    div.className='system-message';
+    div.textContent=text;
+    this.messagesContainer.appendChild(div);
+    this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight;
+  }
+
   updateStatus(text,connected){
-    this.statusText.textContent=text; connected?this.statusDot.classList.add('connected'):this.statusDot.classList.remove('connected');
+    this.statusText.textContent=text;
+    connected?this.statusDot.classList.add('connected'):this.statusDot.classList.remove('connected');
   }
 
   showNotification(msg,type='success'){
@@ -160,7 +188,7 @@ class InternetP2PChat {
   }
 }
 
-const chatApp=new InternetP2PChat();
+new FirebaseP2PChat();
 </script>
 </body>
 </html>
