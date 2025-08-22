@@ -3,57 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>P2P Chat - Mobile Optimized</title>
+<title>P2P Chat - Internet Friendly</title>
 <style>
-  /* ---- Base ---- */
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
-  body { background:#f0f2f5; display:flex; justify-content:center; align-items:center; height:100vh; }
-  .app-container { display:flex; flex-direction:column; width:100%; max-width:480px; height:100vh; border-radius:0; overflow:hidden; box-shadow:none; background:#fff; }
-
-  /* ---- Connection Panel ---- */
-  .connection-panel { padding:15px; background: linear-gradient(135deg,#667eea,#764ba2); color:white; display:flex; flex-direction:column; gap:12px; }
-  .connection-status { display:flex; align-items:center; gap:10px; font-weight:600; font-size:0.95rem; }
-  .status-dot { width:12px; height:12px; border-radius:50%; background:#ff6b6b; transition:0.3s; }
-  .status-dot.connected { background:#51cf66; box-shadow:0 0 8px rgba(81,207,102,0.5); }
-  .connection-controls { display:flex; gap:8px; flex-wrap:wrap; }
-  .connection-input, .username-input, .message-input { padding:10px 12px; border-radius:18px; border:none; outline:none; font-size:0.9rem; flex:1; }
-  .connection-input { background:rgba(255,255,255,0.25); color:white; }
-  .btn { padding:10px 15px; border-radius:18px; border:none; cursor:pointer; font-weight:500; transition:0.3s; font-size:0.9rem; }
-  .btn.primary { background:#fff; color:#667eea; }
-  .btn:hover { opacity:0.85; transform:translateY(-1px); }
-  .offer-display { margin-top:8px; display:flex; flex-direction:column; gap:6px; }
-  .offer-text { width:100%; height:60px; border-radius:10px; padding:6px; font-size:0.85rem; }
-
-  /* ---- Chat ---- */
-  .chat-container { flex:1; display:flex; flex-direction:column; background:#f9fafb; overflow:hidden; position:relative; }
-  .messages-container { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
-  .message { max-width:80%; padding:10px 14px; border-radius:16px; word-wrap:break-word; position:relative; animation:fadeIn 0.3s ease-in; font-size:0.9rem; }
-  @keyframes fadeIn { from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
-  .message.own { align-self:flex-end; background: linear-gradient(135deg,#667eea,#764ba2); color:white; border-bottom-right-radius:4px; }
-  .message.other { align-self:flex-start; background:#e4e6eb; color:#333; border-bottom-left-radius:4px; }
-  .message-info { font-size:0.65rem; opacity:0.6; margin-top:3px; }
-
-  .system-message { text-align:center; font-size:0.75rem; color:#666; margin:4px 0; font-style:italic; }
-
-  .input-container { display:flex; gap:6px; padding:10px 8px; background:#fff; border-top:1px solid #ddd; align-items:center; position:sticky; bottom:0; }
-  .message-input { flex:1; font-size:0.9rem; padding:10px 14px; }
-  .send-btn { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:50px; padding:10px 16px; cursor:pointer; font-weight:600; transition:0.3s; flex-shrink:0; }
-  .send-btn:disabled { opacity:0.5; cursor:not-allowed; }
-
-  /* Scrollbar */
-  .messages-container::-webkit-scrollbar { width:5px; }
-  .messages-container::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
-
-  /* Notification */
-  .notification { position:fixed; top:12px; right:12px; background:#51cf66; color:white; padding:10px 14px; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,0.15); transform:translateX(300px); transition:0.3s; z-index:1000; }
-  .notification.show { transform:translateX(0); }
-
-  /* Mobile adjustments */
-  @media(max-width:480px){
-    .connection-controls{flex-direction:column; gap:6px;}
-    .message{max-width:90%;}
-    .send-btn{padding:10px;}
-  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+  body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
+  .app-container{display:flex;flex-direction:column;width:100%;max-width:480px;height:100vh;overflow:hidden;background:#fff;}
+  .connection-panel{padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;flex-direction:column;gap:12px;}
+  .connection-status{display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.95rem;}
+  .status-dot{width:12px;height:12px;border-radius:50%;background:#ff6b6b;transition:0.3s;}
+  .status-dot.connected{background:#51cf66;box-shadow:0 0 8px rgba(81,207,102,0.5);}
+  .connection-controls{display:flex;gap:8px;flex-wrap:wrap;}
+  .username-input,.message-input{padding:10px 12px;border-radius:18px;border:none;outline:none;font-size:0.9rem;flex:1;}
+  .btn{padding:10px 15px;border-radius:18px;border:none;cursor:pointer;font-weight:500;transition:0.3s;font-size:0.9rem;}
+  .btn.primary{background:#fff;color:#667eea;}
+  .btn:hover{opacity:0.85;transform:translateY(-1px);}
+  .chat-container{flex:1;display:flex;flex-direction:column;background:#f9fafb;overflow:hidden;position:relative;}
+  .messages-container{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+  .message{max-width:80%;padding:10px 14px;border-radius:16px;word-wrap:break-word;position:relative;animation:fadeIn 0.3s ease-in;font-size:0.9rem;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .message.own{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-bottom-right-radius:4px;}
+  .message.other{align-self:flex-start;background:#e4e6eb;color:#333;border-bottom-left-radius:4px;}
+  .message-info{font-size:0.65rem;opacity:0.6;margin-top:3px;}
+  .system-message{text-align:center;font-size:0.75rem;color:#666;margin:4px 0;font-style:italic;}
+  .input-container{display:flex;gap:6px;padding:10px 8px;background:#fff;border-top:1px solid #ddd;align-items:center;position:sticky;bottom:0;}
+  .send-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:50px;padding:10px 16px;cursor:pointer;font-weight:600;transition:0.3s;flex-shrink:0;}
+  .send-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .messages-container::-webkit-scrollbar{width:5px;}
+  .messages-container::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
+  .notification{position:fixed;top:12px;right:12px;background:#51cf66;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);transform:translateX(300px);transition:0.3s;z-index:1000;}
+  .notification.show{transform:translateX(0);}
+  @media(max-width:480px){.message{max-width:90%;}.send-btn{padding:10px;}}
 </style>
 </head>
 <body>
@@ -64,24 +43,12 @@
       <span id="statusText">Disconnected - Ready</span>
     </div>
     <div class="connection-controls">
-      <button class="btn primary" id="createRoomBtn">Create Room</button>
-      <input type="text" class="connection-input" id="roomCodeInput" placeholder="Room code to join">
-      <button class="btn" id="joinRoomBtn">Join Room</button>
-      <button class="btn" id="pasteJoinerBtn">Paste Joiner Response</button>
-    </div>
-    <div class="offer-display" id="offerDisplay" style="display:none;">
-      <textarea class="offer-text" id="offerText" readonly></textarea>
-      <div style="display:flex; gap:5px;">
-        <button class="btn" id="copyBtn">Copy</button>
-        <button class="btn" id="qrBtn">QR</button>
-        <button class="btn" id="shareBtn">Share</button>
-      </div>
+      <button class="btn primary" id="connectBtn">Connect to Peer</button>
     </div>
   </div>
-
   <div class="chat-container">
     <div class="messages-container" id="messagesContainer">
-      <div class="system-message">🚀 P2P Chat powered by WebRTC</div>
+      <div class="system-message">🚀 Internet Friendly P2P Chat</div>
     </div>
     <div class="input-container">
       <input type="text" id="usernameInput" class="username-input" placeholder="Your name" value="Anonymous">
@@ -90,114 +57,110 @@
     </div>
   </div>
 </div>
-
 <div class="notification" id="notification"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.11.1/simplepeer.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js"></script>
 
 <script>
-/* --- Same P2P Chat logic from previous mobile-friendly code --- */
-class P2PChat {
+class InternetP2PChat {
   constructor() {
     this.peer=null; this.connected=false; this.username='Anonymous';
-    this.roomCode=''; this.autoReconnectInterval=null;
-    this.initializeElements(); this.attachEvents(); this.loadPersistentChat();
+    this.ws=null; this.peerId=Math.random().toString(36).substring(2,10);
+    this.initElements(); this.attachEvents();
   }
 
-  initializeElements(){
+  initElements(){
     this.statusDot=document.getElementById('statusDot'); this.statusText=document.getElementById('statusText');
-    this.createRoomBtn=document.getElementById('createRoomBtn'); this.joinRoomBtn=document.getElementById('joinRoomBtn');
-    this.pasteJoinerBtn=document.getElementById('pasteJoinerBtn');
-    this.roomCodeInput=document.getElementById('roomCodeInput'); this.offerDisplay=document.getElementById('offerDisplay');
-    this.offerText=document.getElementById('offerText'); this.copyBtn=document.getElementById('copyBtn'); 
-    this.qrBtn=document.getElementById('qrBtn'); this.shareBtn=document.getElementById('shareBtn');
-    this.messagesContainer=document.getElementById('messagesContainer'); this.usernameInput=document.getElementById('usernameInput');
+    this.connectBtn=document.getElementById('connectBtn');
+    this.messagesContainer=document.getElementById('messagesContainer');
+    this.usernameInput=document.getElementById('usernameInput');
     this.messageInput=document.getElementById('messageInput'); this.sendBtn=document.getElementById('sendBtn');
     this.notification=document.getElementById('notification');
   }
 
   attachEvents(){
-    this.createRoomBtn.addEventListener('click',()=>this.startConnection(true));
-    this.joinRoomBtn.addEventListener('click',()=>this.startConnection(false));
-    this.pasteJoinerBtn.addEventListener('click',()=>this.pasteJoinerResponse());
-    this.copyBtn.addEventListener('click',()=>this.copyCode());
-    this.qrBtn.addEventListener('click',()=>this.showQR());
-    this.shareBtn.addEventListener('click',()=>this.shareCode());
+    this.connectBtn.addEventListener('click',()=>this.connectSignaling());
     this.sendBtn.addEventListener('click',()=>this.sendMessage());
     this.usernameInput.addEventListener('input', e=>this.username=e.target.value.trim()||'Anonymous');
     this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter'&&this.connected)this.sendMessage();});
   }
 
-  generateRoomCode(){return crypto.randomUUID();}
-  startConnection(isInitiator){
-    this.isInitiator=isInitiator;
-    if(isInitiator) this.roomCode=this.generateRoomCode();
-    else this.roomCode=this.roomCodeInput.value.trim();
+  connectSignaling(){
+    if(this.ws) return;
+    this.ws = new WebSocket('wss://signalserver.openwebrtc.org');
+    this.ws.onopen = ()=>this.showNotification('Connected to signaling server','success');
+    this.ws.onmessage = msg=>{
+      const data = JSON.parse(msg.data);
+      if(data.to!==this.peerId) return;
+      if(data.type==='signal') this.peer.signal(data.signal);
+    };
+    this.initPeer(true);
+  }
 
-    if(!this.roomCode)return this.showNotification('Enter a valid room code','error');
-    this.peer = new SimplePeer({initiator:isInitiator,trickle:false});
-    this.peer.on('signal', data=>{
-        this.offerText.value=JSON.stringify(data); this.offerDisplay.style.display='block';
-        this.updateStatus(isInitiator?'Room created! Share code':'Send response back to creator',false);
+  initPeer(initiator){
+    this.peer = new SimplePeer({
+      initiator,
+      trickle:false,
+      config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]}
     });
+
+    this.peer.on('signal', signal=>{
+      this.ws.send(JSON.stringify({type:'signal',signal,from:this.peerId,to:'all'}));
+    });
+
     this.peer.on('connect', ()=>this.onConnect());
     this.peer.on('data', data=>this.handleData(data));
-    this.peer.on('error', err=>{ this.showNotification('Connection error:'+err.message,'error'); this.updateStatus('Connection failed',false); });
-    if(!isInitiator){
-        try{ this.peer.signal(JSON.parse(this.roomCode)); }
-        catch{ return this.showNotification('Invalid room code','error'); }
-    }
+    this.peer.on('error', err=>this.showNotification('Peer error:'+err.message,'error'));
     this.peer.on('close', ()=>{
-        this.connected=false; this.updateStatus('Disconnected. Reconnecting...',false);
-        this.autoReconnectInterval=setTimeout(()=>this.startConnection(isInitiator),3000);
+      this.connected=false; this.updateStatus('Disconnected',false);
+      this.showNotification('Peer disconnected','error');
     });
   }
 
-  pasteJoinerResponse(){
-    if(!this.isInitiator) return this.showNotification('Only creator uses this','error');
-    const answer = prompt('Paste joiner code here:');
-    try{ this.peer.signal(JSON.parse(answer)); this.updateStatus('Connecting...',false); }
-    catch { this.showNotification('Invalid code','error'); }
-  }
-
-  onConnect(){ this.connected=true; clearTimeout(this.autoReconnectInterval);
+  onConnect(){
+    this.connected=true;
     this.updateStatus('Connected! You can chat',true);
     this.messageInput.disabled=false; this.sendBtn.disabled=false; this.messageInput.placeholder='Type a message...';
-    this.addSystemMessage('🎉 Connected!');
+    this.addSystemMessage('🎉 Connected to peer!');
   }
 
-  handleData(data){ let msg=JSON.parse(data.toString());
-    if(msg.type==='message'){ this.addMessage(this.decrypt(msg.text), msg.username,false,msg.id); }
+  handleData(data){
+    let msg=JSON.parse(data.toString());
+    if(msg.type==='message') this.addMessage(this.decrypt(msg.text), msg.username,false);
   }
 
-  sendMessage(){ const text=this.messageInput.value.trim(); if(!text) return;
-    const message={type:'message',text:this.encrypt(text),username:this.username,id:this.generateRoomCode()};
-    this.peer.send(JSON.stringify(message)); this.addMessage(text,this.username,true,message.id); this.messageInput.value='';
+  sendMessage(){
+    const text=this.messageInput.value.trim(); if(!text) return;
+    const msg={type:'message',text:this.encrypt(text),username:this.username};
+    this.peer.send(JSON.stringify(msg));
+    this.addMessage(text,this.username,true); this.messageInput.value='';
   }
 
   encrypt(msg){return CryptoJS.AES.encrypt(msg,'secret-key').toString();}
   decrypt(cipher){return CryptoJS.AES.decrypt(cipher,'secret-key').toString(CryptoJS.enc.Utf8);}
-  addMessage(text,username,isOwn,id){ const div=document.createElement('div');
-    div.className='message '+(isOwn?'own':'other'); div.dataset.id=id||'';
+
+  addMessage(text,username,isOwn){
+    const div=document.createElement('div');
+    div.className='message '+(isOwn?'own':'other');
     div.innerHTML=`<div class="message-bubble">${marked.parseInline(text)}</div>
-                     <div class="message-info">${username} • ${this.formatTime()}</div>`;
-    this.messagesContainer.appendChild(div); this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight;
+                    <div class="message-info">${username} • ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
+    this.messagesContainer.appendChild(div);
+    this.messagesContainer.scrollTop=this.messagesContainer.scrollHeight;
   }
 
-  formatTime(){return new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}
-  updateStatus(text,connected){ this.statusText.textContent=text; connected?this.statusDot.classList.add('connected'):this.statusDot.classList.remove('connected'); }
-  showNotification(msg,type='success'){ this.notification.textContent=msg; this.notification.style.background = type==='error'?'#ff6b6b':'#51cf66';
-    this.notification.classList.add('show'); setTimeout(()=>this.notification.classList.remove('show'),3000); }
-  copyCode(){ navigator.clipboard.writeText(this.offerText.value).then(()=>this.showNotification('Copied!','success')); }
-  showQR(){ new QRious({element:this.offerText,value:this.offerText.value,size:250,level:'H'}); }
-  shareCode(){ navigator.share?navigator.share({title:'Join Chat',text:this.offerText.value}).catch(()=>this.copyCode()):this.copyCode(); }
-  loadPersistentChat(){ const history=JSON.parse(localStorage.getItem('chatHistory')||'[]'); history.forEach(m=>this.addMessage(m.text,m.username,false)); }
+  updateStatus(text,connected){
+    this.statusText.textContent=text; connected?this.statusDot.classList.add('connected'):this.statusDot.classList.remove('connected');
+  }
+
+  showNotification(msg,type='success'){
+    this.notification.textContent=msg; this.notification.style.background=type==='error'?'#ff6b6b':'#51cf66';
+    this.notification.classList.add('show'); setTimeout(()=>this.notification.classList.remove('show'),3000);
+  }
 }
 
-const chatApp=new P2PChat();
+const chatApp=new InternetP2PChat();
 </script>
 </body>
 </html>
