@@ -1,135 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sussy P2P Messenger</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #1e1e1e;
-      color: #eee;
-      text-align: center;
-      padding: 20px;
-    }
-    #chat {
-      width: 100%;
-      max-width: 600px;
-      height: 300px;
-      background: #2c2c2c;
-      border: 1px solid #444;
-      margin: 20px auto;
-      padding: 10px;
-      overflow-y: auto;
-      text-align: left;
-    }
-    input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
-      border: none;
-    }
-    input {
-      width: 250px;
-    }
-    button {
-      background: #4caf50;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    #status {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2P Group Messenger</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🔒 Sussy P2P Messenger</h1>
 
-  <div>
-    <button onclick="createRoom()">Create Room</button>
-    <input id="roomId" placeholder="Enter Room ID to Join">
-    <button onclick="joinRoom()">Join Room</button>
-  </div>
+<div id="login">
+    <h2>Join a Room</h2>
+    <input type="text" id="username" placeholder="Enter your name">
+    <input type="text" id="room" placeholder="Room name">
+    <input type="text" id="roomKey" placeholder="Room password/key">
+    <button id="joinBtn">Join Room</button>
+</div>
 
-  <div id="status">Not connected</div>
+<div id="chat" style="display:none;">
+    <h2 id="roomTitle"></h2>
+    <div id="messages"></div>
+    <input type="text" id="msgInput" placeholder="Type a message">
+    <button id="sendBtn">Send</button>
+</div>
 
-  <div id="chat"></div>
-
-  <div>
-    <input id="msg" placeholder="Type a message...">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <script>
-    let peer, conn;
-
-    // Host creates room
-    function createRoom() {
-      peer = new Peer(null, {
-        host: 'peerjs.com',
-        port: 443,
-        path: '/',
-        secure: true
-      });
-
-      peer.on('open', id => {
-        document.getElementById("status").innerText = "✅ Room created! Share this ID: " + id;
-      });
-
-      peer.on('connection', c => {
-        conn = c;
-        document.getElementById("status").innerText = "👥 Friend joined!";
-        conn.on('data', msg => addMessage("Friend: " + msg));
-      });
-    }
-
-    // Guest joins room
-    function joinRoom() {
-      let roomId = document.getElementById("roomId").value.trim();
-      if (!roomId) {
-        alert("Please enter a Room ID!");
-        return;
-      }
-
-      peer = new Peer(null, {
-        host: 'peerjs.com',
-        port: 443,
-        path: '/',
-        secure: true
-      });
-
-      peer.on('open', () => {
-        conn = peer.connect(roomId);
-        conn.on('open', () => {
-          document.getElementById("status").innerText = "✅ Connected to host!";
-          addMessage("Connected to host!");
-        });
-        conn.on('data', msg => addMessage("Host: " + msg));
-      });
-    }
-
-    // Send message
-    function sendMessage() {
-      let msg = document.getElementById("msg").value.trim();
-      if (conn && conn.open) {
-        conn.send(msg);
-        addMessage("You: " + msg);
-        document.getElementById("msg").value = "";
-      } else {
-        alert("⚠️ You must first create or join a room!");
-      }
-    }
-
-    // Add message to chat box
-    function addMessage(txt) {
-      let chat = document.getElementById("chat");
-      chat.innerHTML += txt + "<br>";
-      chat.scrollTop = chat.scrollHeight;
-    }
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.1/dist/peerjs.min.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
