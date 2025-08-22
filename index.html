@@ -1,411 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>P2P Sussy Messenger 😏</title>
-  <link rel="preconnect" href="https://unpkg.com">
+  <meta charset="UTF-8">
+  <title>Sussy P2P Messenger</title>
   <style>
-    :root {
-      --bg: #0f1115;
-      --panel: #161a22;
-      --accent: #6ee7b7;
-      --muted: #8b95a7;
-      --text: #e5e7eb;
-      --danger: #ef4444;
-    }
-    * { box-sizing: border-box; }
     body {
-      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
-      background: radial-gradient(1200px 800px at 10% 0%, #14203b22, transparent),
-                  radial-gradient(900px 600px at 90% 20%, #0a3a2a22, transparent),
-                  var(--bg);
-      color: var(--text);
-      min-height: 100vh; display: grid; place-items: center; padding: 18px;
+      font-family: Arial, sans-serif;
+      background: #1e1e1e;
+      color: #eee;
+      text-align: center;
+      padding: 20px;
     }
-    .app { width: 100%; max-width: 880px; background: var(--panel); border: 1px solid #2a2f3a; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px #0006; }
-    header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #232734; background: #0f1320aa; backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 2; }
-    header .title { font-weight: 700; letter-spacing: 0.4px; }
-    header .status { font-size: 12px; color: var(--muted); }
-
-    .grid { display: grid; grid-template-columns: 280px 1fr; min-height: 70vh; }
-    @media (max-width: 840px) { .grid { grid-template-columns: 1fr; } }
-
-    .left { border-right: 1px solid #232734; padding: 14px; display: grid; gap: 12px; }
-    .card { background: #121622; border: 1px solid #242a36; border-radius: 12px; padding: 12px; }
-    .card h3 { margin: 0 0 8px 0; font-size: 15px; color: #cfd6e4; }
-    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
-    input, textarea, button, select { font: inherit; }
-    input[type="text"], input[type="password"], textarea {
-      width: 100%; background: #0e1220; border: 1px solid #2b3242; color: var(--text);
-      border-radius: 10px; padding: 10px 12px; outline: none; transition: border .2s; 
+    #chat {
+      width: 100%;
+      max-width: 600px;
+      height: 300px;
+      background: #2c2c2c;
+      border: 1px solid #444;
+      margin: 20px auto;
+      padding: 10px;
+      overflow-y: auto;
+      text-align: left;
     }
-    input:focus, textarea:focus { border-color: #3b82f6; }
-    .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-    .btn { background: #1a9f7a; border: none; color: #02150f; font-weight: 700; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
-    .btn.secondary { background: #2a3344; color: #cbd5e1; }
-    .btn.danger { background: var(--danger); color: white; }
-    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
-    .list { display: grid; gap: 6px; max-height: 160px; overflow-y: auto; }
-    .pill { background: #0e1220; border: 1px solid #2b3242; padding: 8px 10px; border-radius: 999px; font-size: 12px; color: #cbd5e1; display: inline-flex; align-items: center; gap: 8px; }
-
-    .chat { display: grid; grid-template-rows: 1fr auto; }
-    .messages { padding: 16px; display: grid; gap: 10px; align-content: start; max-height: 70vh; overflow-y: auto; }
-    .msg { display: grid; gap: 4px; max-width: 72ch; }
-    .msg .meta { font-size: 12px; color: var(--muted); }
-    .msg .bubble { background: #0e1220; border: 1px solid #2b3242; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; }
-    .msg.me .bubble { background: #0b3228; border-color: #245d50; }
-
-    .composer { border-top: 1px solid #232734; padding: 12px; display: grid; gap: 8px; }
-    .composer .row { grid-template-columns: 1fr auto; }
-    .composer .btn { padding-inline: 18px; }
-
-    .footer-note { font-size: 11px; color: var(--muted); text-align: center; padding: 10px; }
-    .badge { font-size: 11px; background: #0b3228; color: #8bf3c8; border: 1px solid #245d50; border-radius: 6px; padding: 2px 6px; }
-    .danger { color: #fda4af; }
-    .ok { color: #86efac; }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+    }
+    input {
+      width: 250px;
+    }
+    button {
+      background: #4caf50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <header>
-      <div>
-        <div class="title">P2P Sussy Messenger 😏</div>
-        <div class="status" id="status">Disconnected</div>
-      </div>
-      <div>
-        <span class="badge" id="peerIdBadge" title="Your Peer ID"></span>
-      </div>
-    </header>
+  <h1>🔒 Sussy P2P Messenger</h1>
 
-    <div class="grid">
-      <aside class="left">
-        <div class="card">
-          <h3>Start / Join</h3>
-          <label>Nickname</label>
-          <input type="text" id="nickname" placeholder="eg. sus_lord" />
-          <div class="hint">Shown next to your messages.</div>
-          <div style="height: 8px"></div>
-
-          <label>Room ID (host's Peer ID)</label>
-          <div class="row">
-            <input type="text" id="roomId" placeholder="e.g. abc123-superroom" />
-            <button class="btn secondary" id="genId">Gen</button>
-          </div>
-          <div class="hint">First person: click <b>Create Room</b> to become host and share your <i>Peer ID</i>. Others: paste that ID and <b>Join Room</b>.</div>
-
-          <div style="height: 10px"></div>
-          <label>Shared Passphrase (optional, for E2E)</label>
-          <input type="password" id="passphrase" placeholder="share privately with friends" />
-          <div class="hint">If set, messages are encrypted with AES-GCM using a key derived from this passphrase.</div>
-
-          <div style="height: 12px"></div>
-          <div class="row">
-            <button class="btn" id="createBtn">Create Room</button>
-            <button class="btn" id="joinBtn">Join Room</button>
-          </div>
-          <div class="hint">Your IP may be visible to peers (that’s how WebRTC connects). Use only with people you trust.</div>
-        </div>
-
-        <div class="card">
-          <h3>Connected Peers</h3>
-          <div id="peers" class="list"></div>
-        </div>
-
-        <div class="card">
-          <h3>Quick Share</h3>
-          <button class="btn secondary" id="copyInvite">Copy Invite Link</button>
-          <div class="hint">Sends a link with your Room ID in the URL so friends can join fast.</div>
-        </div>
-      </aside>
-
-      <main class="chat">
-        <div class="messages" id="messages"></div>
-        <div class="composer">
-          <div class="row">
-            <input type="text" id="messageInput" placeholder="Type your sussy message…" />
-            <button class="btn" id="sendBtn">Send</button>
-          </div>
-          <div class="footer-note">
-            <span>Ephemeral: nothing is stored on any server. Close the tab = chat gone.</span>
-          </div>
-        </div>
-      </main>
-    </div>
+  <div>
+    <button onclick="createRoom()">Create Room</button>
+    <input id="roomId" placeholder="Enter Room ID to Join">
+    <button onclick="joinRoom()">Join Room</button>
   </div>
 
-  <!-- PeerJS CDN -->
+  <div id="status">Not connected</div>
+
+  <div id="chat"></div>
+
+  <div>
+    <input id="msg" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script>
-    /**
-     * P2P Sussy Messenger
-     * - Host (first user) creates a Peer and shares their Peer ID (Room ID)
-     * - Joiners connect to the host
-     * - Host relays messages to all connected peers (mesh via host)
-     * - Optional E2E via passphrase (AES-GCM)
-     */
+    let peer, conn;
 
-    // UI refs
-    const statusEl = document.getElementById('status');
-    const peerIdBadge = document.getElementById('peerIdBadge');
-    const peersList = document.getElementById('peers');
-    const messagesEl = document.getElementById('messages');
-    const nicknameEl = document.getElementById('nickname');
-    const roomIdEl = document.getElementById('roomId');
-    const passphraseEl = document.getElementById('passphrase');
-    const createBtn = document.getElementById('createBtn');
-    const joinBtn = document.getElementById('joinBtn');
-    const sendBtn = document.getElementById('sendBtn');
-    const messageInput = document.getElementById('messageInput');
-    const genIdBtn = document.getElementById('genId');
-    const copyInviteBtn = document.getElementById('copyInvite');
-
-    // State
-    let peer = null;            // Your Peer instance
-    let isHost = false;         // Are you the host of the room?
-    let hostConn = null;        // If you are a client, connection to host
-    const clientConns = new Map(); // If you are host, map<peerId, DataConnection>
-    let cryptoKey = null;       // Derived AES-GCM key (optional)
-
-    // --- Helpers ---
-    const uid = () => Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
-    const now = () => new Date().toLocaleTimeString();
-
-    function setStatus(text) { statusEl.textContent = text; }
-    function setPeerId(id) {
-      peerIdBadge.textContent = id ? `Your ID: ${id}` : '';
-      peerIdBadge.style.display = id ? 'inline-block' : 'none';
-    }
-
-    function addPeerBadge(id, nick) {
-      const el = document.createElement('div');
-      el.className = 'pill';
-      el.dataset.peer = id;
-      el.textContent = nick ? `${nick} (${id})` : id;
-      peersList.appendChild(el);
-    }
-
-    function removePeerBadge(id) {
-      const el = peersList.querySelector(`[data-peer="${id}"]`);
-      if (el) el.remove();
-    }
-
-    function addMessage({ nick, text, mine=false }) {
-      const wrapper = document.createElement('div');
-      wrapper.className = 'msg' + (mine ? ' me' : '');
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      meta.textContent = `${nick || 'Anon'} • ${now()}`;
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = text;
-      wrapper.appendChild(meta);
-      wrapper.appendChild(bubble);
-      messagesEl.appendChild(wrapper);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    async function deriveKey(passphrase) {
-      // Derive AES-GCM key from passphrase using PBKDF2
-      const enc = new TextEncoder();
-      const salt = enc.encode('p2p-sussy-messenger-v1');
-      const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
-      return crypto.subtle.deriveKey(
-        { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
-        baseKey,
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
-    }
-
-    async function encryptIfNeeded(obj) {
-      if (!cryptoKey) return { clear: true, data: obj };
-      const enc = new TextEncoder();
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const payload = enc.encode(JSON.stringify(obj));
-      const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, payload);
-      return { clear: false, iv: Array.from(iv), cipher: Array.from(new Uint8Array(cipher)) };
-    }
-
-    async function decryptIfNeeded(packet) {
-      if (packet.clear) return packet.data;
-      if (!cryptoKey) throw new Error('Encrypted message but no key set');
-      const iv = new Uint8Array(packet.iv);
-      const cipher = new Uint8Array(packet.cipher);
-      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, cipher);
-      const dec = new TextDecoder();
-      return JSON.parse(dec.decode(plain));
-    }
-
-    function broadcastFromHost(obj, exceptId = null) {
-      for (const [pid, conn] of clientConns) {
-        if (pid === exceptId) continue;
-        try { conn.open && conn.send(obj); } catch {}
-      }
-    }
-
-    function updateInviteLink() {
-      const rid = peer?.id || roomIdEl.value.trim();
-      if (!rid) return;
-      const url = new URL(window.location.href);
-      url.searchParams.set('room', rid);
-      navigator.clipboard.writeText(url.toString()).then(() => {
-        copyInviteBtn.textContent = 'Copied!';
-        setTimeout(() => copyInviteBtn.textContent = 'Copy Invite Link', 1200);
-      });
-    }
-
-    // --- Peer setup ---
-    function createPeer(customId = '') {
-      // Use PeerJS Cloud PeerServer. You can self-host later if you want.
-      const cfg = {
+    // Host creates room
+    function createRoom() {
+      peer = new Peer(null, {
         host: 'peerjs.com',
         port: 443,
         path: '/',
-        secure: true,
-        debug: 1
-      };
-      const pid = customId || undefined; // let server assign if empty
-      peer = new Peer(pid, cfg);
-
-      peer.on('open', async (id) => {
-        setPeerId(id);
-        setStatus(isHost ? 'Hosting room…' : 'Ready');
-        // If URL has ?room=, auto-join
-        const urlRoom = new URL(location.href).searchParams.get('room');
-        if (!isHost && urlRoom && !hostConn) {
-          roomIdEl.value = urlRoom;
-          joinRoom();
-        }
+        secure: true
       });
 
-      peer.on('error', (err) => {
-        console.error(err);
-        setStatus('Error: ' + err.type);
+      peer.on('open', id => {
+        document.getElementById("status").innerText = "✅ Room created! Share this ID: " + id;
       });
 
-      peer.on('disconnected', () => setStatus('Disconnected (peer server)'));
-
-      // Host accepts incoming connections
-      peer.on('connection', (conn) => {
-        if (!isHost) return; // only host accepts multiple
-        clientConns.set(conn.peer, conn);
-        addPeerBadge(conn.peer);
-        setStatus(`Peers: ${clientConns.size}`);
-
-        conn.on('data', async (packet) => {
-          try {
-            const msg = await decryptIfNeeded(packet);
-            if (msg.type === 'hello') {
-              conn.metadata = { nick: msg.nick };
-              // Ack room info
-              const ack = await encryptIfNeeded({ type: 'room-info', host: peer.id });
-              conn.send(ack);
-              broadcastFromHost(await encryptIfNeeded({ type: 'peer-join', peerId: conn.peer, nick: msg.nick }), conn.peer);
-              return;
-            }
-            if (msg.type === 'chat') {
-              // show locally on host
-              addMessage({ nick: msg.nick, text: msg.text, mine: false });
-              // relay to others
-              broadcastFromHost(packet, conn.peer);
-            }
-          } catch (e) {
-            console.warn('Failed to process packet from', conn.peer, e);
-          }
-        });
-
-        conn.on('close', () => {
-          clientConns.delete(conn.peer);
-          removePeerBadge(conn.peer);
-          setStatus(`Peers: ${clientConns.size}`);
-          broadcastFromHost({ clear: true, data: { type: 'peer-leave', peerId: conn.peer } });
-        });
+      peer.on('connection', c => {
+        conn = c;
+        document.getElementById("status").innerText = "👥 Friend joined!";
+        conn.on('data', msg => addMessage("Friend: " + msg));
       });
     }
 
-    // --- Actions ---
-    genIdBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      roomIdEl.value = 'room-' + uid();
-    });
-
-    copyInviteBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      updateInviteLink();
-    });
-
-    createBtn.addEventListener('click', async () => {
-      if (peer) peer.destroy();
-      isHost = true;
-      const nick = nicknameEl.value.trim() || 'Host';
-      if (passphraseEl.value.trim()) cryptoKey = await deriveKey(passphraseEl.value.trim());
-      createPeer(roomIdEl.value.trim());
-      addMessage({ nick: 'System', text: `Room created. Share your ID with friends. (Nick: ${nick})` });
-    });
-
+    // Guest joins room
     function joinRoom() {
-      const rid = roomIdEl.value.trim();
-      const nick = nicknameEl.value.trim() || 'Anon';
-      if (!rid) { alert('Enter Room ID'); return; }
-      hostConn = peer.connect(rid, { reliable: true });
-      hostConn.on('open', async () => {
-        setStatus('Connected to host');
-        if (passphraseEl.value.trim()) cryptoKey = await deriveKey(passphraseEl.value.trim());
-        hostConn.send(await encryptIfNeeded({ type: 'hello', nick }));
-      });
-      hostConn.on('data', async (packet) => {
-        try {
-          const msg = await decryptIfNeeded(packet);
-          if (msg.type === 'room-info') return; // ignore
-          if (msg.type === 'peer-join') addMessage({ nick: 'System', text: `${msg.nick || msg.peerId} joined` });
-          else if (msg.type === 'peer-leave') addMessage({ nick: 'System', text: `${msg.peerId} left` });
-          else if (msg.type === 'chat') addMessage({ nick: msg.nick, text: msg.text });
-        } catch (e) { console.warn('Failed packet from host', e); }
-      });
-      hostConn.on('close', () => setStatus('Host left / connection closed'));
-      hostConn.on('error', (e) => setStatus('Error: ' + e.type));
-    }
-
-    joinBtn.addEventListener('click', () => {
-      if (!peer) createPeer();
-      isHost = false;
-      if (peer.open) joinRoom();
-      else peer.on('open', joinRoom);
-    });
-
-    async function sendChat() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      const nick = nicknameEl.value.trim() || (isHost ? 'Host' : 'Anon');
-      const packet = await encryptIfNeeded({ type: 'chat', nick, text });
-
-      if (isHost) {
-        addMessage({ nick, text, mine: true });
-        broadcastFromHost(packet);
-      } else if (hostConn && hostConn.open) {
-        addMessage({ nick, text, mine: true });
-        hostConn.send(packet);
-      } else {
-        alert('Not connected. Create or join a room first.');
+      let roomId = document.getElementById("roomId").value.trim();
+      if (!roomId) {
+        alert("Please enter a Room ID!");
         return;
       }
-      messageInput.value = '';
+
+      peer = new Peer(null, {
+        host: 'peerjs.com',
+        port: 443,
+        path: '/',
+        secure: true
+      });
+
+      peer.on('open', () => {
+        conn = peer.connect(roomId);
+        conn.on('open', () => {
+          document.getElementById("status").innerText = "✅ Connected to host!";
+          addMessage("Connected to host!");
+        });
+        conn.on('data', msg => addMessage("Host: " + msg));
+      });
     }
 
-    sendBtn.addEventListener('click', sendChat);
-    messageInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-    });
+    // Send message
+    function sendMessage() {
+      let msg = document.getElementById("msg").value.trim();
+      if (conn && conn.open) {
+        conn.send(msg);
+        addMessage("You: " + msg);
+        document.getElementById("msg").value = "";
+      } else {
+        alert("⚠️ You must first create or join a room!");
+      }
+    }
 
-    // Auto-fill from URL if present
-    (function initFromUrl(){
-      const p = new URL(location.href).searchParams;
-      const room = p.get('room');
-      if (room) roomIdEl.value = room;
-    })();
-
+    // Add message to chat box
+    function addMessage(txt) {
+      let chat = document.getElementById("chat");
+      chat.innerHTML += txt + "<br>";
+      chat.scrollTop = chat.scrollHeight;
+    }
   </script>
 </body>
 </html>
