@@ -1,208 +1,411 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Firebase P2P Chat - Two Tabs Fix</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-  body{background:#f0f2f5;display:flex;justify-content:center;align-items:center;height:100vh;}
-  .app-container{display:flex;flex-direction:column;width:100%;max-width:480px;height:100vh;overflow:hidden;background:#fff;}
-  .connection-panel{padding:15px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;display:flex;flex-direction:column;gap:12px;}
-  .connection-status{display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.95rem;}
-  .status-dot{width:12px;height:12px;border-radius:50%;background:#ff6b6b;transition:0.3s;}
-  .status-dot.connected{background:#51cf66;box-shadow:0 0 8px rgba(81,207,102,0.5);}
-  .connection-controls{display:flex;gap:8px;flex-wrap:wrap;}
-  .username-input,.message-input,.connection-input{padding:10px 12px;border-radius:18px;border:none;outline:none;font-size:0.9rem;flex:1;}
-  .btn{padding:10px 15px;border-radius:18px;border:none;cursor:pointer;font-weight:500;transition:0.3s;font-size:0.9rem;}
-  .btn.primary{background:#fff;color:#667eea;}
-  .btn:hover{opacity:0.85;transform:translateY(-1px);}
-  .chat-container{flex:1;display:flex;flex-direction:column;background:#f9fafb;overflow:hidden;position:relative;}
-  .messages-container{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
-  .message{max-width:80%;padding:10px 14px;border-radius:16px;word-wrap:break-word;position:relative;animation:fadeIn 0.3s ease-in;font-size:0.9rem;}
-  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-  .message.own{align-self:flex-end;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-bottom-right-radius:4px;}
-  .message.other{align-self:flex-start;background:#e4e6eb;color:#333;border-bottom-left-radius:4px;}
-  .message-info{font-size:0.65rem;opacity:0.6;margin-top:3px;}
-  .system-message{text-align:center;font-size:0.75rem;color:#666;margin:4px 0;font-style:italic;}
-  .input-container{display:flex;gap:6px;padding:10px 8px;background:#fff;border-top:1px solid #ddd;align-items:center;position:sticky;bottom:0;}
-  .send-btn{background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:50px;padding:10px 16px;cursor:pointer;font-weight:600;transition:0.3s;flex-shrink:0;}
-  .send-btn:disabled{opacity:0.5;cursor:not-allowed;}
-  .messages-container::-webkit-scrollbar{width:5px;}
-  .messages-container::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
-  .notification{position:fixed;top:12px;right:12px;background:#51cf66;color:white;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.15);transform:translateX(300px);transition:0.3s;z-index:1000;}
-  .notification.show{transform:translateX(0);}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>P2P Sussy Messenger 😏</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #161a22;
+      --accent: #6ee7b7;
+      --muted: #8b95a7;
+      --text: #e5e7eb;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
+      background: radial-gradient(1200px 800px at 10% 0%, #14203b22, transparent),
+                  radial-gradient(900px 600px at 90% 20%, #0a3a2a22, transparent),
+                  var(--bg);
+      color: var(--text);
+      min-height: 100vh; display: grid; place-items: center; padding: 18px;
+    }
+    .app { width: 100%; max-width: 880px; background: var(--panel); border: 1px solid #2a2f3a; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px #0006; }
+    header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #232734; background: #0f1320aa; backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 2; }
+    header .title { font-weight: 700; letter-spacing: 0.4px; }
+    header .status { font-size: 12px; color: var(--muted); }
+
+    .grid { display: grid; grid-template-columns: 280px 1fr; min-height: 70vh; }
+    @media (max-width: 840px) { .grid { grid-template-columns: 1fr; } }
+
+    .left { border-right: 1px solid #232734; padding: 14px; display: grid; gap: 12px; }
+    .card { background: #121622; border: 1px solid #242a36; border-radius: 12px; padding: 12px; }
+    .card h3 { margin: 0 0 8px 0; font-size: 15px; color: #cfd6e4; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 6px; }
+    input, textarea, button, select { font: inherit; }
+    input[type="text"], input[type="password"], textarea {
+      width: 100%; background: #0e1220; border: 1px solid #2b3242; color: var(--text);
+      border-radius: 10px; padding: 10px 12px; outline: none; transition: border .2s; 
+    }
+    input:focus, textarea:focus { border-color: #3b82f6; }
+    .row { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    .btn { background: #1a9f7a; border: none; color: #02150f; font-weight: 700; padding: 10px 12px; border-radius: 10px; cursor: pointer; }
+    .btn.secondary { background: #2a3344; color: #cbd5e1; }
+    .btn.danger { background: var(--danger); color: white; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .list { display: grid; gap: 6px; max-height: 160px; overflow-y: auto; }
+    .pill { background: #0e1220; border: 1px solid #2b3242; padding: 8px 10px; border-radius: 999px; font-size: 12px; color: #cbd5e1; display: inline-flex; align-items: center; gap: 8px; }
+
+    .chat { display: grid; grid-template-rows: 1fr auto; }
+    .messages { padding: 16px; display: grid; gap: 10px; align-content: start; max-height: 70vh; overflow-y: auto; }
+    .msg { display: grid; gap: 4px; max-width: 72ch; }
+    .msg .meta { font-size: 12px; color: var(--muted); }
+    .msg .bubble { background: #0e1220; border: 1px solid #2b3242; padding: 10px 12px; border-radius: 12px; white-space: pre-wrap; word-break: break-word; }
+    .msg.me .bubble { background: #0b3228; border-color: #245d50; }
+
+    .composer { border-top: 1px solid #232734; padding: 12px; display: grid; gap: 8px; }
+    .composer .row { grid-template-columns: 1fr auto; }
+    .composer .btn { padding-inline: 18px; }
+
+    .footer-note { font-size: 11px; color: var(--muted); text-align: center; padding: 10px; }
+    .badge { font-size: 11px; background: #0b3228; color: #8bf3c8; border: 1px solid #245d50; border-radius: 6px; padding: 2px 6px; }
+    .danger { color: #fda4af; }
+    .ok { color: #86efac; }
+  </style>
 </head>
 <body>
-<div class="app-container">
-  <div class="connection-panel">
-    <div class="connection-status">
-      <div class="status-dot" id="statusDot"></div>
-      <span id="statusText">Disconnected - Ready</span>
-    </div>
-    <div class="connection-controls">
-      <input type="text" id="roomInput" class="connection-input" placeholder="Room name">
-      <button class="btn primary" id="connectBtn">Connect</button>
+  <div class="app">
+    <header>
+      <div>
+        <div class="title">P2P Sussy Messenger 😏</div>
+        <div class="status" id="status">Disconnected</div>
+      </div>
+      <div>
+        <span class="badge" id="peerIdBadge" title="Your Peer ID"></span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <aside class="left">
+        <div class="card">
+          <h3>Start / Join</h3>
+          <label>Nickname</label>
+          <input type="text" id="nickname" placeholder="eg. sus_lord" />
+          <div class="hint">Shown next to your messages.</div>
+          <div style="height: 8px"></div>
+
+          <label>Room ID (host's Peer ID)</label>
+          <div class="row">
+            <input type="text" id="roomId" placeholder="e.g. abc123-superroom" />
+            <button class="btn secondary" id="genId">Gen</button>
+          </div>
+          <div class="hint">First person: click <b>Create Room</b> to become host and share your <i>Peer ID</i>. Others: paste that ID and <b>Join Room</b>.</div>
+
+          <div style="height: 10px"></div>
+          <label>Shared Passphrase (optional, for E2E)</label>
+          <input type="password" id="passphrase" placeholder="share privately with friends" />
+          <div class="hint">If set, messages are encrypted with AES-GCM using a key derived from this passphrase.</div>
+
+          <div style="height: 12px"></div>
+          <div class="row">
+            <button class="btn" id="createBtn">Create Room</button>
+            <button class="btn" id="joinBtn">Join Room</button>
+          </div>
+          <div class="hint">Your IP may be visible to peers (that’s how WebRTC connects). Use only with people you trust.</div>
+        </div>
+
+        <div class="card">
+          <h3>Connected Peers</h3>
+          <div id="peers" class="list"></div>
+        </div>
+
+        <div class="card">
+          <h3>Quick Share</h3>
+          <button class="btn secondary" id="copyInvite">Copy Invite Link</button>
+          <div class="hint">Sends a link with your Room ID in the URL so friends can join fast.</div>
+        </div>
+      </aside>
+
+      <main class="chat">
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+          <div class="row">
+            <input type="text" id="messageInput" placeholder="Type your sussy message…" />
+            <button class="btn" id="sendBtn">Send</button>
+          </div>
+          <div class="footer-note">
+            <span>Ephemeral: nothing is stored on any server. Close the tab = chat gone.</span>
+          </div>
+        </div>
+      </main>
     </div>
   </div>
-  <div class="chat-container">
-    <div class="messages-container" id="messagesContainer">
-      <div class="system-message">🚀 Firebase P2P Chat</div>
-    </div>
-    <div class="input-container">
-      <input type="text" id="usernameInput" class="username-input" placeholder="Your name" value="Anonymous">
-      <input type="text" id="messageInput" class="message-input" placeholder="Connect to start..." disabled>
-      <button id="sendBtn" class="send-btn" disabled>Send</button>
-    </div>
-  </div>
-</div>
-<div class="notification" id="notification"></div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, onValue, set, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import SimplePeer from "https://cdn.jsdelivr.net/npm/simple-peer@9.11.1/simplepeer.min.js";
-import CryptoJS from "https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js";
-import { marked } from "https://cdnjs.cloudflare.com/ajax/libs/marked/5.0.2/marked.min.js";
+  <!-- PeerJS CDN -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script>
+    /**
+     * P2P Sussy Messenger
+     * - Host (first user) creates a Peer and shares their Peer ID (Room ID)
+     * - Joiners connect to the host
+     * - Host relays messages to all connected peers (mesh via host)
+     * - Optional E2E via passphrase (AES-GCM)
+     */
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB6UHNUKO2Qj3IUgsISxz99BoOQYuGS_vc",
-  authDomain: "link-88288.firebaseapp.com",
-  projectId: "link-88288",
-  storageBucket: "link-88288.appspot.com",
-  messagingSenderId: "166586794486",
-  appId: "1:166586794486:web:abd1f2dfbbbbfe56ef47d7"
-};
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+    // UI refs
+    const statusEl = document.getElementById('status');
+    const peerIdBadge = document.getElementById('peerIdBadge');
+    const peersList = document.getElementById('peers');
+    const messagesEl = document.getElementById('messages');
+    const nicknameEl = document.getElementById('nickname');
+    const roomIdEl = document.getElementById('roomId');
+    const passphraseEl = document.getElementById('passphrase');
+    const createBtn = document.getElementById('createBtn');
+    const joinBtn = document.getElementById('joinBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('messageInput');
+    const genIdBtn = document.getElementById('genId');
+    const copyInviteBtn = document.getElementById('copyInvite');
 
-class FirebaseP2PChat {
-  constructor(){
-    this.peerMap = {}; // store peers by peerId
-    this.username = 'Anonymous';
-    this.room = '';
-    this.peerId = Math.random().toString(36).substring(2,10);
-    this.initElements();
-    this.attachEvents();
-  }
+    // State
+    let peer = null;            // Your Peer instance
+    let isHost = false;         // Are you the host of the room?
+    let hostConn = null;        // If you are a client, connection to host
+    const clientConns = new Map(); // If you are host, map<peerId, DataConnection>
+    let cryptoKey = null;       // Derived AES-GCM key (optional)
 
-  initElements(){
-    this.roomInput = document.getElementById('roomInput');
-    this.connectBtn = document.getElementById('connectBtn');
-    this.messagesContainer = document.getElementById('messagesContainer');
-    this.usernameInput = document.getElementById('usernameInput');
-    this.messageInput = document.getElementById('messageInput');
-    this.sendBtn = document.getElementById('sendBtn');
-    this.statusDot = document.getElementById('statusDot');
-    this.statusText = document.getElementById('statusText');
-    this.notification = document.getElementById('notification');
-  }
+    // --- Helpers ---
+    const uid = () => Math.random().toString(36).slice(2) + '-' + Math.random().toString(36).slice(2);
+    const now = () => new Date().toLocaleTimeString();
 
-  attachEvents(){
-    this.connectBtn.addEventListener('click', ()=>this.connectRoom());
-    this.sendBtn.addEventListener('click', ()=>this.sendMessage());
-    this.usernameInput.addEventListener('input', e=>this.username = e.target.value.trim() || 'Anonymous');
-    this.messageInput.addEventListener('keypress', e=>{if(e.key==='Enter') this.sendMessage();});
-  }
+    function setStatus(text) { statusEl.textContent = text; }
+    function setPeerId(id) {
+      peerIdBadge.textContent = id ? `Your ID: ${id}` : '';
+      peerIdBadge.style.display = id ? 'inline-block' : 'none';
+    }
 
-  connectRoom(){
-    this.room = this.roomInput.value.trim();
-    if(!this.room) return alert("Enter room name");
+    function addPeerBadge(id, nick) {
+      const el = document.createElement('div');
+      el.className = 'pill';
+      el.dataset.peer = id;
+      el.textContent = nick ? `${nick} (${id})` : id;
+      peersList.appendChild(el);
+    }
 
-    // Add self to users list
-    const userRef = ref(db, `rooms/${this.room}/users/${this.peerId}`);
-    set(userRef, this.username);
-    window.addEventListener('beforeunload', ()=>remove(userRef));
+    function removePeerBadge(id) {
+      const el = peersList.querySelector(`[data-peer="${id}"]`);
+      if (el) el.remove();
+    }
 
-    // Listen for signals from all peers
-    const signalsRef = ref(db, `rooms/${this.room}/signals`);
-    onChildAdded(signalsRef, snapshot=>{
-      const obj = snapshot.val();
-      if(obj.from === this.peerId) return;
-      remove(snapshot.ref); // remove used signal
-      if(!this.peerMap[obj.from]){
-        this.createPeer(obj.from, false); // existing peer, initiator=false
+    function addMessage({ nick, text, mine=false }) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg' + (mine ? ' me' : '');
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `${nick || 'Anon'} • ${now()}`;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = text;
+      wrapper.appendChild(meta);
+      wrapper.appendChild(bubble);
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function deriveKey(passphrase) {
+      // Derive AES-GCM key from passphrase using PBKDF2
+      const enc = new TextEncoder();
+      const salt = enc.encode('p2p-sussy-messenger-v1');
+      const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey(
+        { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+        baseKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    async function encryptIfNeeded(obj) {
+      if (!cryptoKey) return { clear: true, data: obj };
+      const enc = new TextEncoder();
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const payload = enc.encode(JSON.stringify(obj));
+      const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, payload);
+      return { clear: false, iv: Array.from(iv), cipher: Array.from(new Uint8Array(cipher)) };
+    }
+
+    async function decryptIfNeeded(packet) {
+      if (packet.clear) return packet.data;
+      if (!cryptoKey) throw new Error('Encrypted message but no key set');
+      const iv = new Uint8Array(packet.iv);
+      const cipher = new Uint8Array(packet.cipher);
+      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, cipher);
+      const dec = new TextDecoder();
+      return JSON.parse(dec.decode(plain));
+    }
+
+    function broadcastFromHost(obj, exceptId = null) {
+      for (const [pid, conn] of clientConns) {
+        if (pid === exceptId) continue;
+        try { conn.open && conn.send(obj); } catch {}
       }
-      this.peerMap[obj.from].signal(obj.signal);
-    });
+    }
 
-    // Listen for new users to connect
-    const usersRef = ref(db, `rooms/${this.room}/users`);
-    onValue(usersRef, snapshot=>{
-      const users = snapshot.val() || {};
-      Object.keys(users).forEach(peerId=>{
-        if(peerId !== this.peerId && !this.peerMap[peerId]){
-          this.createPeer(peerId, true); // new user, initiator=true
+    function updateInviteLink() {
+      const rid = peer?.id || roomIdEl.value.trim();
+      if (!rid) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('room', rid);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        copyInviteBtn.textContent = 'Copied!';
+        setTimeout(() => copyInviteBtn.textContent = 'Copy Invite Link', 1200);
+      });
+    }
+
+    // --- Peer setup ---
+    function createPeer(customId = '') {
+      // Use PeerJS Cloud PeerServer. You can self-host later if you want.
+      const cfg = {
+        host: 'peerjs.com',
+        port: 443,
+        path: '/',
+        secure: true,
+        debug: 1
+      };
+      const pid = customId || undefined; // let server assign if empty
+      peer = new Peer(pid, cfg);
+
+      peer.on('open', async (id) => {
+        setPeerId(id);
+        setStatus(isHost ? 'Hosting room…' : 'Ready');
+        // If URL has ?room=, auto-join
+        const urlRoom = new URL(location.href).searchParams.get('room');
+        if (!isHost && urlRoom && !hostConn) {
+          roomIdEl.value = urlRoom;
+          joinRoom();
         }
       });
+
+      peer.on('error', (err) => {
+        console.error(err);
+        setStatus('Error: ' + err.type);
+      });
+
+      peer.on('disconnected', () => setStatus('Disconnected (peer server)'));
+
+      // Host accepts incoming connections
+      peer.on('connection', (conn) => {
+        if (!isHost) return; // only host accepts multiple
+        clientConns.set(conn.peer, conn);
+        addPeerBadge(conn.peer);
+        setStatus(`Peers: ${clientConns.size}`);
+
+        conn.on('data', async (packet) => {
+          try {
+            const msg = await decryptIfNeeded(packet);
+            if (msg.type === 'hello') {
+              conn.metadata = { nick: msg.nick };
+              // Ack room info
+              const ack = await encryptIfNeeded({ type: 'room-info', host: peer.id });
+              conn.send(ack);
+              broadcastFromHost(await encryptIfNeeded({ type: 'peer-join', peerId: conn.peer, nick: msg.nick }), conn.peer);
+              return;
+            }
+            if (msg.type === 'chat') {
+              // show locally on host
+              addMessage({ nick: msg.nick, text: msg.text, mine: false });
+              // relay to others
+              broadcastFromHost(packet, conn.peer);
+            }
+          } catch (e) {
+            console.warn('Failed to process packet from', conn.peer, e);
+          }
+        });
+
+        conn.on('close', () => {
+          clientConns.delete(conn.peer);
+          removePeerBadge(conn.peer);
+          setStatus(`Peers: ${clientConns.size}`);
+          broadcastFromHost({ clear: true, data: { type: 'peer-leave', peerId: conn.peer } });
+        });
+      });
+    }
+
+    // --- Actions ---
+    genIdBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      roomIdEl.value = 'room-' + uid();
     });
 
-    this.updateStatus('Waiting for peers...', false);
-  }
-
-  createPeer(peerId, initiator){
-    const peer = new SimplePeer({ initiator, trickle: false, config:{iceServers:[{urls:'stun:stun.l.google.com:19302'}]} });
-    this.peerMap[peerId] = peer;
-
-    peer.on('signal', data=>{
-      push(ref(db, `rooms/${this.room}/signals`), { from: this.peerId, to: peerId, signal: data });
+    copyInviteBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      updateInviteLink();
     });
 
-    peer.on('connect', ()=>{
-      this.messageInput.disabled = false;
-      this.sendBtn.disabled = false;
-      this.addSystemMessage(`🎉 Connected to ${peerId}`);
-      this.updateStatus('Connected!', true);
+    createBtn.addEventListener('click', async () => {
+      if (peer) peer.destroy();
+      isHost = true;
+      const nick = nicknameEl.value.trim() || 'Host';
+      if (passphraseEl.value.trim()) cryptoKey = await deriveKey(passphraseEl.value.trim());
+      createPeer(roomIdEl.value.trim());
+      addMessage({ nick: 'System', text: `Room created. Share your ID with friends. (Nick: ${nick})` });
     });
 
-    peer.on('data', data=>{
-      const msg = JSON.parse(data.toString());
-      if(msg.type==='message') this.addMessage(this.decrypt(msg.text), msg.username, false);
+    function joinRoom() {
+      const rid = roomIdEl.value.trim();
+      const nick = nicknameEl.value.trim() || 'Anon';
+      if (!rid) { alert('Enter Room ID'); return; }
+      hostConn = peer.connect(rid, { reliable: true });
+      hostConn.on('open', async () => {
+        setStatus('Connected to host');
+        if (passphraseEl.value.trim()) cryptoKey = await deriveKey(passphraseEl.value.trim());
+        hostConn.send(await encryptIfNeeded({ type: 'hello', nick }));
+      });
+      hostConn.on('data', async (packet) => {
+        try {
+          const msg = await decryptIfNeeded(packet);
+          if (msg.type === 'room-info') return; // ignore
+          if (msg.type === 'peer-join') addMessage({ nick: 'System', text: `${msg.nick || msg.peerId} joined` });
+          else if (msg.type === 'peer-leave') addMessage({ nick: 'System', text: `${msg.peerId} left` });
+          else if (msg.type === 'chat') addMessage({ nick: msg.nick, text: msg.text });
+        } catch (e) { console.warn('Failed packet from host', e); }
+      });
+      hostConn.on('close', () => setStatus('Host left / connection closed'));
+      hostConn.on('error', (e) => setStatus('Error: ' + e.type));
+    }
+
+    joinBtn.addEventListener('click', () => {
+      if (!peer) createPeer();
+      isHost = false;
+      if (peer.open) joinRoom();
+      else peer.on('open', joinRoom);
     });
 
-    peer.on('close', ()=>{
-      this.addSystemMessage(`❌ Disconnected from ${peerId}`);
-      delete this.peerMap[peerId];
+    async function sendChat() {
+      const text = messageInput.value.trim();
+      if (!text) return;
+      const nick = nicknameEl.value.trim() || (isHost ? 'Host' : 'Anon');
+      const packet = await encryptIfNeeded({ type: 'chat', nick, text });
+
+      if (isHost) {
+        addMessage({ nick, text, mine: true });
+        broadcastFromHost(packet);
+      } else if (hostConn && hostConn.open) {
+        addMessage({ nick, text, mine: true });
+        hostConn.send(packet);
+      } else {
+        alert('Not connected. Create or join a room first.');
+        return;
+      }
+      messageInput.value = '';
+    }
+
+    sendBtn.addEventListener('click', sendChat);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
     });
-  }
 
-  sendMessage(){
-    const text = this.messageInput.value.trim();
-    if(!text) return;
-    const msg = { type:'message', text: this.encrypt(text), username: this.username };
-    Object.values(this.peerMap).forEach(p=>p.send(JSON.stringify(msg)));
-    this.addMessage(text, this.username, true);
-    this.messageInput.value = '';
-  }
+    // Auto-fill from URL if present
+    (function initFromUrl(){
+      const p = new URL(location.href).searchParams;
+      const room = p.get('room');
+      if (room) roomIdEl.value = room;
+    })();
 
-  addMessage(text, username, isOwn){
-    const div = document.createElement('div');
-    div.className = 'message ' + (isOwn ? 'own':'other');
-    div.innerHTML = `<div class="message-bubble">${marked.parseInline(text)}</div>
-                     <div class="message-info">${username} • ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>`;
-    this.messagesContainer.appendChild(div);
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-  }
-
-  addSystemMessage(text){
-    const div = document.createElement('div');
-    div.className = 'system-message';
-    div.textContent = text;
-    this.messagesContainer.appendChild(div);
-    this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-  }
-
-  encrypt(msg){ return CryptoJS.AES.encrypt(msg,'secret-key').toString(); }
-  decrypt(cipher){ return CryptoJS.AES.decrypt(cipher,'secret-key').toString(CryptoJS.enc.Utf8); }
-
-  updateStatus(text, connected){
-    this.statusText.textContent = text;
-    connected ? this.statusDot.classList.add('connected') : this.statusDot.classList.remove('connected');
-  }
-}
-
-new FirebaseP2PChat();
-</script>
+  </script>
 </body>
 </html>
