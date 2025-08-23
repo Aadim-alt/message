@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Messenger</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>💬 Simple Messenger</h1>
+            <p>Real-time chat without database storage</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message system-message">
+                Welcome to the chat! Messages will disappear when you refresh the page.
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message..." maxlength="500">
+            <button id="sendButton">Send</button>
+        </div>
+        
+        <div class="user-info">
+            <input type="text" id="usernameInput" placeholder="Enter your name" maxlength="20">
+            <button id="setUsername">Set Name</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
